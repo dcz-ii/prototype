@@ -1,38 +1,51 @@
-import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { useQuery } from "react-apollo-hooks";
+import React, { useState, useEffect } from 'react';
+import { useMutation, useSubscription } from "react-apollo-hooks";
 import gql from "graphql-tag";
+import moment from 'moment';
 import _ from 'lodash';
 
 import './App.css';
-import Home from './pages/Home';
-import { getData } from './redux/action'
+import { DirectiveLocation } from 'graphql';
 
 function App(props) {
-  useEffect(() => {
-    props.getData();
-  }, [])
+  const [todoTitle, handleTitle] = useState('');
 
   const GET_MY_TODOS = gql`
-    query getTodos {
-      todos {
+    subscription {
+      todos(limit: 10, order_by: {created_at: desc}) {
         id
         is_completed
         created_at
         title
         user {
+          id
           name
         }
       }
+    }`;
+
+  const ADD_TODO = gql`
+    mutation AddTodo($todoTitle: String!) {
+      insert_todos(objects: {is_public: true, title: $todoTitle }) {
+        returning {
+          id
+          is_completed
+          is_public
+        }
+      }
     }
-    `;
+  `;
 
-  const { data, error, loading } = useQuery(GET_MY_TODOS);
+  let { data, error, loading } = useSubscription(GET_MY_TODOS);
+  let [toggleAddToDo, { loadingAdd }] = useMutation(ADD_TODO, {
+    update: (proxy, mutationResult) => {
+      /* your custom update logic */
+      console.log(mutationResult)
+    },
+    variables: { todoTitle }
+  });
 
-
-  console.log(loading)
-
-  if (loading) return 'Loading...';
+  if (loading || loadingAdd) return 'Loading...';
   if (error) return `Error! ${error.message}`;
   
   console.log(data)
@@ -47,28 +60,29 @@ function App(props) {
         </tr>
         {_.map(data.todos, (data, idx) => {
           return(
-            <tr>
+            <tr key={idx}>
               <td width="25%">{data.title}</td>
               <td width="25%">{data.user.name}</td>
               <td width="25%">{data.is_completed}</td>
-              <td width="25%">{data.created_at}</td>
+              <td width="25%">{moment(data.created_at).format('MMMM Do, h:mm')}</td>
             </tr>
           )
         })}
-
       </table>
+
+        <div>
+        <label>Title: </label>
+        <input 
+          value={todoTitle}
+          onChange={e => handleTitle(e.target.value)}
+        />  
+        </div>
+        <button onClick={() => {
+          handleTitle('')
+          toggleAddToDo()
+        }}>ADD TODO</button>
     </div>
   );
 }
 
-const mapStateToProps = store => {
-	return {
-		globalReducer: store.globalReducer,
-	};
-};
-
-const mapActionToProps = {
-  getData,
-};
-
-export default connect(mapStateToProps,mapActionToProps)(App);
+export default App;
