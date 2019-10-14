@@ -9,6 +9,7 @@ import './App.css';
 
 function App(props) {
   const [todoTitle, handleTitle] = useState('');
+  const [editId, setId] = useState(null);
 
   const GET_MY_TODOS = gql`
     subscription {
@@ -36,6 +37,13 @@ function App(props) {
     }
   `;
 
+  const EDIT_TODO = gql`mutation toggleTodo ($title: String!, $id: Int!){
+      update_todos(where: {id: {_eq: $id}}, _set: {title: $title}) {
+        affected_rows
+      }
+    }
+  `  
+
   const DELETE_TODO = gql`
     mutation removeTodo ($id: Int!) {
       delete_todos(where: {id: {_eq: $id}}) {
@@ -53,10 +61,14 @@ function App(props) {
     },
     variables: { todoTitle }
   });
+  
+  let [toggleEditTodo, { loadingEdit }] = useMutation(EDIT_TODO, {
+    variables: { title: todoTitle, id: editId }
+  });
 
   const [toggleDelete, { loadingDel }] = useMutation(DELETE_TODO);
 
-  if (loading || loadingAdd || loadingDel) return 'Loading...';
+  if (loading || loadingAdd || loadingDel || loadingEdit) return 'Loading...';
   if (error) return `Error! ${error.message}`;
   
   console.log(data)
@@ -68,22 +80,29 @@ function App(props) {
           <th>ID</th>
           <th>Name</th>
           <th>completed</th>
-          <th>created</th>
-          <th>delete?</th>
+          <th>EDIT</th>
+          <th>DELETE</th>
         </tr>
         {_.map(data.todos, (data, idx) => {
           return(
             <tr key={idx}>
-              <td width="25%">{data.title}</td>
-              <td width="25%">{data.id}</td>
-              <td width="25%">{data.user.name}</td>
-              <td width="25%">{_.toString(data.is_completed)}</td>
-              <td width="25%">{moment(data.created_at).format('MMMM Do, h:mm')}</td>
-              <td width="25%">
+              <td width="20%">{data.title}</td>
+              <td width="20%">{data.id}</td>
+              <td width="20%">{data.user.name}</td>
+              <td width="20%">{moment(data.created_at).format('MMMM Do, h:mm')}</td>
+              <td width="10%">
+                {data.user.name === 'danilo' && <button onClick={() => {
+                  setId(data.id);
+                  handleTitle(data.title)
+                }}>
+                  EDIT
+                </button>}
+              </td>
+              <td width="10%">
                 {data.user.name === 'danilo' && <button onClick={() => {
                   toggleDelete({ variables: { id: data.id } });
                 }}>
-                  delete
+                  DELETE
                 </button>}
               </td>
             </tr>
@@ -98,10 +117,19 @@ function App(props) {
           onChange={e => handleTitle(e.target.value)}
         />  
         </div>
-        <button onClick={() => {
-          handleTitle('')
-          toggleAddToDo()
-        }}>ADD TODO</button>
+        {editId ? 
+          <button onClick={() => {
+            handleTitle('')
+            setId(null)
+            toggleEditTodo()
+          }}>EDIT TODO - {editId}</button>
+        :
+          <button onClick={() => {
+            handleTitle('')
+            toggleAddToDo()
+          }}>ADD TODO</button>
+        }
+        
     </div>
   );
 }
