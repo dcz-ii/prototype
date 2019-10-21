@@ -24,21 +24,21 @@ const Home = observer((props) => {
 		}
 	});
 
-	const [toggleAddToDo, { loadingAdd }] = useMutation(ADD_TODO, {
+	const [toggleAddToDo] = useMutation(ADD_TODO, {
 		update: (proxy, mutationResult) => {
 			setloadingVal(true)
 		},
 		variables: { todoTitle }
 	});
 	
-	const [toggleEditTodo, { loadingEdit }] = useMutation(EDIT_TODO, {
+	const [toggleEditTodo] = useMutation(EDIT_TODO, {
 		update: (proxy, mutationResult) => {
 			setloadingVal(true)
 		},
 		variables: { title: todoTitle, id: editId }
 	});
 
-	const [toggleDelete, { loadingDel }] = useMutation(DELETE_TODO, {
+	const [toggleDelete] = useMutation(DELETE_TODO, {
 		update: (proxy, mutationResult) => {
 			setloadingVal(true)
 		},
@@ -48,7 +48,7 @@ const Home = observer((props) => {
 	
 	return (
 		<div>
-			{loading || loadingVal && <div style={{
+			{loading || loadingVal ? <div style={{
 				height: '100%',
 				width: '100%',
 				position: 'absolute',
@@ -59,7 +59,7 @@ const Home = observer((props) => {
 				zIndex: 99,
 			}}>
 				<CircularProgress />
-			</div>}
+			</div> : ''}
 			<ToDoList 
 				data={todoData} 
 				setId={setId}
