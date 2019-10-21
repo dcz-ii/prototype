@@ -10,7 +10,6 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-
 const createApolloClient = (authToken) => {
   return new ApolloClient({
     link: new WebSocketLink({
