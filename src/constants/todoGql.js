@@ -1,41 +1,36 @@
 import gql from "graphql-tag";
 
-export const GET_MY_TODOS = gql`
+export const GET_MEETINGS = gql`
     subscription {
-        todos(limit: 10, order_by: {created_at: desc}) {
-                id
-                is_completed
-                created_at
-                title
-                user {
-                    id
-                    name
-                }
-        }
-}`;
-
-export const ADD_TODO = gql`
-    mutation AddTodo($todoTitle: String!) {
-        insert_todos(objects: {is_public: true, title: $todoTitle }) {
-            returning {
-                id
-                is_completed
-                is_public
-            }
+        meetings {
+            id
+            name
+            has_started
+            has_finished
+            created_at
         }
     }
 `;
 
-export const EDIT_TODO = gql`mutation toggleTodo ($title: String!, $id: Int!){
-        update_todos(where: {id: {_eq: $id}}, _set: {title: $title}) {
+export const ADD_MEETING = gql`
+    mutation addMeeting($title: String!) {
+        insert_meetings(objects: {name: $title}) {
+            affected_rows
+        }
+    }
+`;
+
+export const EDIT_MEETING = gql`
+    mutation toggleTodo ($meetingName: String!, $meetingID: Int!){
+        update_meetings(where: {id: {_eq: $meetingID}}, _set: {name: $meetingName}) {
             affected_rows
         }
     }
   `  
 
-export const DELETE_TODO = gql`
-    mutation removeTodo ($id: Int!) {
-        delete_todos(where: {id: {_eq: $id}}) {
+export const DELETE_MEETING = gql`
+    mutation removeMeeting ($id: Int!) {
+        delete_meetings(where: {id: {_eq: $id}}) {
             affected_rows
         }
     }

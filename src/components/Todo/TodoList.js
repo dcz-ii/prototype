@@ -22,7 +22,7 @@ function TodoList(props) {
 		}}>
 			<TextField 
 				label='Title'
-				value={props.todoTitle}
+				value={props.title}
 				onChange={e => props.handleTitle(e.target.value)}
 				style={{marginRight: 20}}
 			/>
@@ -30,12 +30,12 @@ function TodoList(props) {
 				<Button variant="contained" color="primary" onClick={() => {
 					props.handleTitle('')
 					props.setId(null)
-					props.toggleEditTodo()
-				}}>EDIT TODO - {props.editId}</Button>
+					props.toggleEditMeeting()
+				}}>EDIT TODO</Button>
 				:
 				<Button variant="contained" onClick={() => {
+					props.toggleAddMeeting()
 					props.handleTitle('')
-					props.toggleAddToDo()
 				}}>ADD TODO</Button>
 			}
 		</div>
@@ -44,36 +44,38 @@ function TodoList(props) {
 		<Table>
 			<TableHead>
 				<TableRow>
-					<TableCell>Name</TableCell>
-					<TableCell>Title</TableCell>
 					<TableCell>ID</TableCell>
-					<TableCell>completed</TableCell>
+					<TableCell>Name</TableCell>
+					<TableCell>Created</TableCell>
+					<TableCell>Started</TableCell>
+					<TableCell>Finished</TableCell>
 					<TableCell>EDIT</TableCell>
 					<TableCell>DELETE</TableCell>
 				</TableRow>
 			</TableHead>
 			<TableBody>
-			{_.map(props.data.todos, (data, idx) => {
+			{_.map(props.data, (data, idx) => {
 				return(
 				<TableRow key={idx}>
-					<TableCell width="20%">{data.user.name}</TableCell>
-					<TableCell width="20%">{data.title}</TableCell>
 					<TableCell width="20%">{data.id}</TableCell>
+					<TableCell width="20%">{data.name}</TableCell>
 					<TableCell width="20%">{moment(data.created_at).format('MMMM Do, h:mm')}</TableCell>
+					<TableCell width="20%">{_.toString(data.has_started)}</TableCell>
+					<TableCell width="20%">{_.toString(data.has_finished)}</TableCell>
 					<TableCell width="10%">
-						{data.user.name === 'danilo' && <Button variant="contained" color="primary" onClick={() => {
+						<Button variant="contained" color="primary" onClick={() => {
 							props.setId(data.id);
-							props.handleTitle(data.title)
+							props.handleTitle(data.name)
 						}}>
 							EDIT
-						</Button>}
+						</Button>
 					</TableCell>
 					<TableCell width="10%">
-						{data.user.name === 'danilo' && <Button variant="contained" color="secondary" onClick={() => {
+						<Button variant="contained" color="secondary" onClick={() => {
 							props.toggleDelete({ variables: { id: data.id } });
 						}}>
 							DELETE
-						</Button>}
+						</Button>
 					</TableCell>
 				</TableRow>
 				)
