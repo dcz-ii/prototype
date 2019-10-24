@@ -1,5 +1,4 @@
-import React from 'react';
-import moment from 'moment';
+import React, { useState } from 'react';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TextField from '@material-ui/core/TextField';
@@ -10,80 +9,88 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import _ from 'lodash';
 
-function TodoList(props) {
-  
-  return (
-	<Paper style={{maxWidth: '80%', margin: '0px auto', paddingTop: 20}}>
-		<div style={{
-			display: 'flex',
-			flexDirection: 'row',
-			justifyContent: 'center',
-			alignItems: 'center'
-		}}>
-			<TextField 
-				label='Title'
-				value={props.title}
-				onChange={e => props.handleTitle(e.target.value)}
-				style={{marginRight: 20}}
-			/>
-			{props.editId ? 
-				<Button variant="contained" color="primary" onClick={() => {
-					props.handleTitle('')
-					props.setId(null)
-					props.toggleEditMeeting()
-				}}>EDIT TODO</Button>
-				:
-				<Button variant="contained" onClick={() => {
-					props.toggleAddMeeting()
-					props.handleTitle('')
-				}}>ADD TODO</Button>
-			}
-		</div>
-			
+function MeetingList(props) {
+	const { data, toggleAddTodo, toggleEditTodo, toggleDeleteTodo, setView } = props;
+	const [title, setTitle] = useState('');
+	const [editId, setId] = useState(null);
 
-		<Table>
-			<TableHead>
-				<TableRow>
-					<TableCell>ID</TableCell>
-					<TableCell>Name</TableCell>
-					<TableCell>Created</TableCell>
-					<TableCell>Started</TableCell>
-					<TableCell>Finished</TableCell>
-					<TableCell>EDIT</TableCell>
-					<TableCell>DELETE</TableCell>
-				</TableRow>
-			</TableHead>
-			<TableBody>
-			{_.map(props.data, (data, idx) => {
-				return(
-				<TableRow key={idx}>
-					<TableCell width="20%">{data.id}</TableCell>
-					<TableCell width="20%">{data.name}</TableCell>
-					<TableCell width="20%">{moment(data.created_at).format('MMMM Do, h:mm')}</TableCell>
-					<TableCell width="20%">{_.toString(data.has_started)}</TableCell>
-					<TableCell width="20%">{_.toString(data.has_finished)}</TableCell>
-					<TableCell width="10%">
-						<Button variant="contained" color="primary" onClick={() => {
-							props.setId(data.id);
-							props.handleTitle(data.name)
-						}}>
-							EDIT
-						</Button>
-					</TableCell>
-					<TableCell width="10%">
-						<Button variant="contained" color="secondary" onClick={() => {
-							props.toggleDelete({ variables: { id: data.id } });
-						}}>
-							DELETE
-						</Button>
-					</TableCell>
-				</TableRow>
-				)
-			})}
-			</TableBody>
-		</Table>
-	</Paper>
-  );
+	return (
+		<Paper style={{position: 'relative', maxWidth: '80%', margin: '0px auto', paddingTop: 20}}>
+			<Button
+				style={{
+					position: 'absolute',
+					left: 10,
+					top: 20
+				}}
+				onClick={() => setView('meeting')}>
+				BACK
+			</Button>
+			<h1>TODO LISTS</h1>
+			<div style={{
+				display: 'flex',
+				flexDirection: 'row',
+				justifyContent: 'center',
+				alignItems: 'center'
+			}}>
+				<TextField 
+					label='Title'
+					value={title}
+					onChange={e => setTitle(e.target.value)}
+					style={{marginRight: 20}}
+				/>
+				{editId ? 
+					<Button variant="contained" color="primary" onClick={() => {
+						toggleEditTodo({ variables: { title: title, todoID: editId } })
+						setTitle('')
+						setId(null)
+					}}>EDIT TODO</Button>
+					:
+					<Button variant="contained" onClick={() => {
+						toggleAddTodo({ variables: { title: title, meetingID: data.id } })
+						setTitle('')
+					}}>ADD TODO</Button>
+				}
+			</div>
+
+			<Table>
+				<TableHead>
+					<TableRow>
+						<TableCell>ID</TableCell>
+						<TableCell>Title</TableCell>
+						<TableCell>Completed</TableCell>
+						<TableCell>EDIT</TableCell>
+						<TableCell>DELETE</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody>
+				{_.map(_.sortBy(data.todos,['id'],['asc']), (data, idx) => {
+					return(
+					<TableRow key={idx} hover>
+						<TableCell width="20%">{data.id}</TableCell>
+						<TableCell width="20%">{data.title}</TableCell>
+						<TableCell width="20%">{_.toString(data.is_completed)}</TableCell>
+						<TableCell width="10%">
+							<Button variant="contained" color="primary" onClick={() => {
+								setId(data.id);
+								setTitle(data.title)
+							}}>
+								EDIT
+							</Button>
+						</TableCell>
+						<TableCell width="10%">
+							<Button variant="contained" color="secondary" onClick={() => {
+								toggleDeleteTodo({ variables: { id: data.id } });
+							}}>
+								DELETE
+							</Button>
+						</TableCell>
+					</TableRow>
+					)
+				})}
+				</TableBody>
+			</Table>
+		</Paper>
+	);
 }
 
-export default TodoList;
+export default MeetingList;

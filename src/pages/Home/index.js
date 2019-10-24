@@ -3,21 +3,25 @@ import { observer, useObservable } from 'mobx-react-lite';
 import { useMutation, useSubscription } from "react-apollo-hooks";
 import { toJS } from 'mobx'
 import CircularProgress from '@material-ui/core/CircularProgress';
+import _ from 'lodash';
 
-import ToDoList from '../../components/Todo/TodoList';
-import { GET_MEETINGS, ADD_MEETING, EDIT_MEETING, DELETE_MEETING } from '../../constants/todoGql';
-import todoModel from '../../models/todoModel';
+import MeetingList from '../../components/Meeting/MeetingList';
+import TodoList from '../../components/ToDo/TodoList';
+import { GET_MEETINGS, ADD_MEETING, EDIT_MEETING, DELETE_MEETING } from '../../constants/meetingGql';
+import { ADD_TODO, EDIT_TODO, DELETE_TODO } from '../../constants/todoGql';
+import meetingsModel from '../../models/meetingsModel';
 
 const Home = observer((props) => {
-	const store = useObservable(todoModel);
+	const store = useObservable(meetingsModel);
 
 	const [title, handleTitle] = useState('');
+	const [view, setView] = useState('meeting');
 	const [loadingVal, setloadingVal] = useState(false);
 	const [editId, setId] = useState(null);
 
 	let { error, loading } = useSubscription(GET_MEETINGS, {
 		onSubscriptionData: ({ client, subscriptionData }) => {
-			store.todos = toJS(subscriptionData.data.meetings);
+			store.meetings = toJS(subscriptionData.data.meetings);
 			setloadingVal(false);
 		}
 	});
@@ -26,7 +30,7 @@ const Home = observer((props) => {
 		update: (proxy, mutationResult) => {
 			setloadingVal(true)
 		},
-		variables: { title }
+		variables: { title, id: _.toString(toJS(store.meetings).length + 1) }
 	});
 	
 	const [toggleEditMeeting] = useMutation(EDIT_MEETING, {
@@ -41,6 +45,28 @@ const Home = observer((props) => {
 			setloadingVal(true)
 		},
 	});
+
+	const [toggleAddTodo] = useMutation(ADD_TODO, {
+		update: (proxy, mutationResult) => {
+			setloadingVal(true)
+		},
+	});
+
+	const [toggleEditTodo] = useMutation(EDIT_TODO, {
+		update: (proxy, mutationResult) => {
+			setloadingVal(true)
+		},
+	});
+	
+	const [toggleDeleteTodo] = useMutation(DELETE_TODO, {
+		update: (proxy, mutationResult) => {
+			setloadingVal(true)
+		},
+	});
+
+	function setMeetingID (data) {
+		store.selectedMeetingID = data;
+	}
 
 	if (error) return `Error! ${error.message}`;
 	
@@ -58,16 +84,27 @@ const Home = observer((props) => {
 			}}>
 				<CircularProgress />
 			</div> : ''}
-			<ToDoList 
-				data={toJS(store.todos)} 
-				setId={setId}
-				editId={editId}
-				toggleEditMeeting={toggleEditMeeting}
-				toggleDelete={toggleDelete}
-				toggleAddMeeting={toggleAddMeeting}
-				handleTitle={handleTitle}
-				title={title}
-			/>
+			{view === 'meeting' ?
+				<MeetingList 
+					data={toJS(store.meetings)} 
+					setId={setId}
+					editId={editId}
+					toggleEditMeeting={toggleEditMeeting}
+					toggleDelete={toggleDelete}
+					toggleAddMeeting={toggleAddMeeting}
+					handleTitle={handleTitle}
+					title={title}
+					setView={setView}
+					setMeetingID={setMeetingID}
+				/>
+			: <TodoList 
+				data={_.find(toJS(store.meetings), {"id": toJS(store.selectedMeetingID)})}
+				toggleAddTodo={toggleAddTodo}
+				toggleDeleteTodo={toggleDeleteTodo}
+				setView={setView}
+				toggleEditTodo={toggleEditTodo}
+				/>
+			}
 		</div>
 	);
 })
