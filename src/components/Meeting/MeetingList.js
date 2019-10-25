@@ -47,7 +47,6 @@ function MeetingList(props) {
 					<TableCell>ID</TableCell>
 					<TableCell>Name</TableCell>
 					<TableCell>Created</TableCell>
-					<TableCell>Started</TableCell>
 					<TableCell>Finished</TableCell>
 					<TableCell>EDIT</TableCell>
 					<TableCell>DELETE</TableCell>
@@ -57,13 +56,15 @@ function MeetingList(props) {
 			{_.map(_.sortBy(props.data,['id'],['asc']), (data, idx) => {
 				return(
 				<TableRow key={idx} hover onClick={() => {
-					props.setView('todo')
-					props.setMeetingID(data.id)
-				}}>
+					if(!data.has_finished) {
+						props.setView('todo')
+						props.setMeetingID(data.id)
+					}
+				}}
+				>
 					<TableCell width="20%">{data.id}</TableCell>
 					<TableCell width="20%">{data.name}</TableCell>
 					<TableCell width="20%">{moment(data.created_at).format('MMMM Do, h:mm')}</TableCell>
-					<TableCell width="20%">{_.toString(data.has_started)}</TableCell>
 					<TableCell width="20%">{_.toString(data.has_finished)}</TableCell>
 					<TableCell width="10%">
 						<Button variant="contained" color="primary" onClick={(e) => {

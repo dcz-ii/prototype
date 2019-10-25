@@ -5,7 +5,7 @@ export const GET_MEETINGS = gql`
         meetings {
             id
             name
-            has_started
+            start_time
             has_finished
             created_at
             todos {
@@ -40,4 +40,20 @@ export const DELETE_MEETING = gql`
         }
     }
 `;
+
+export const START_MEETING = gql`
+    mutation startMeeting ($meetingID: String!, $meetingTime: timestamptz!) {
+        update_meetings(where: {id: {_eq: $meetingID}}, _set: {start_time: $meetingTime}) {
+            affected_rows
+        }
+    }
+`
+
+export const END_MEETING = gql`
+    mutation startMeeting ($meetingID: String!) {
+        update_meetings(where: {id: {_eq: $meetingID}}, _set: {has_finished: true}) {
+            affected_rows
+        }
+    }
+`
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import moment from 'moment';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TextField from '@material-ui/core/TextField';
@@ -10,9 +11,18 @@ import Button from '@material-ui/core/Button';
 import _ from 'lodash';
 
 function MeetingList(props) {
-	const { data, toggleAddTodo, toggleEditTodo, toggleDeleteTodo, setView } = props;
+	const { data, toggleAddTodo, toggleEditTodo, toggleDeleteTodo, setView, toggleStartMeeting, toggleStopMeeting } = props;
 	const [title, setTitle] = useState('');
 	const [editId, setId] = useState(null);
+
+	function triggerStart(data) {
+		if(!data.start_time) {
+			toggleStartMeeting({ variables: { meetingTime: moment().format(), meetingID: data.id } })
+		} else {
+			toggleStopMeeting({ variables: { meetingID: data.id }})
+			setView('meeting')
+		}
+	}
 
 	return (
 		<Paper style={{position: 'relative', maxWidth: '80%', margin: '0px auto', paddingTop: 20}}>
@@ -24,6 +34,11 @@ function MeetingList(props) {
 				}}
 				onClick={() => setView('meeting')}>
 				BACK
+			</Button>
+
+			{!data.start_time ? '' : <h2>{moment(data.start_time).startOf('hour').fromNow()}</h2>}
+			<Button variant="contained" onClick={() => triggerStart(data)}>
+				{!data.start_time ? 'START MEETING' : 'END MEETING'}
 			</Button>
 			<h1>TODO LISTS</h1>
 			<div style={{

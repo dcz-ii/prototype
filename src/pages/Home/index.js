@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 import MeetingList from '../../components/Meeting/MeetingList';
 import TodoList from '../../components/ToDo/TodoList';
-import { GET_MEETINGS, ADD_MEETING, EDIT_MEETING, DELETE_MEETING } from '../../constants/meetingGql';
+import { GET_MEETINGS, ADD_MEETING, EDIT_MEETING, DELETE_MEETING, START_MEETING, END_MEETING } from '../../constants/meetingGql';
 import { ADD_TODO, EDIT_TODO, DELETE_TODO } from '../../constants/todoGql';
 import meetingsModel from '../../models/meetingsModel';
 
@@ -38,6 +38,18 @@ const Home = observer((props) => {
 			setloadingVal(true)
 		},
 		variables: { meetingName: title, meetingID: editId }
+	});
+
+	const [toggleStartMeeting] = useMutation(START_MEETING, {
+		update: (proxy, mutationResult) => {
+			setloadingVal(true)
+		},
+	});
+	
+	const [toggleStopMeeting] = useMutation(END_MEETING, {
+		update: (proxy, mutationResult) => {
+			setloadingVal(true)
+		},
 	});
 
 	const [toggleDelete] = useMutation(DELETE_MEETING, {
@@ -103,6 +115,8 @@ const Home = observer((props) => {
 				toggleDeleteTodo={toggleDeleteTodo}
 				setView={setView}
 				toggleEditTodo={toggleEditTodo}
+				toggleStartMeeting={toggleStartMeeting}
+				toggleStopMeeting={toggleStopMeeting}
 				/>
 			}
 		</div>
