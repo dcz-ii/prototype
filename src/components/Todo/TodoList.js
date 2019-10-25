@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,10 +14,18 @@ function MeetingList(props) {
 	const { data, toggleAddTodo, toggleEditTodo, toggleDeleteTodo, setView, toggleStartMeeting, toggleStopMeeting } = props;
 	const [title, setTitle] = useState('');
 	const [editId, setId] = useState(null);
+	const [time, startTime] = useState(0);
+
+	useEffect(() => {
+		if(data.start_time) {
+			setInterval(() => startTime(moment(data.start_time).fromNow()), 1)
+		}
+	})
 
 	function triggerStart(data) {
 		if(!data.start_time) {
 			toggleStartMeeting({ variables: { meetingTime: moment().format(), meetingID: data.id } })
+			setInterval(() => startTime(moment().fromNow()), 1)
 		} else {
 			toggleStopMeeting({ variables: { meetingID: data.id }})
 			setView('meeting')
@@ -36,7 +44,7 @@ function MeetingList(props) {
 				BACK
 			</Button>
 
-			{!data.start_time ? '' : <h2>{moment(data.start_time).startOf('hour').fromNow()}</h2>}
+			{!data.start_time ? '' : <h2>{time}</h2>}
 			<Button variant="contained" onClick={() => triggerStart(data)}>
 				{!data.start_time ? 'START MEETING' : 'END MEETING'}
 			</Button>
