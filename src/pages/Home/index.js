@@ -80,6 +80,10 @@ const Home = observer((props) => {
 		store.selectedMeetingID = data;
 	}
 
+	function viewMeeting(id) {
+		props.history.push(`/meeting/${id}`);
+	}
+
 	if (error) return `Error! ${error.message}`;
 	
 	return (
@@ -106,7 +110,7 @@ const Home = observer((props) => {
 					toggleAddMeeting={toggleAddMeeting}
 					handleTitle={handleTitle}
 					title={title}
-					setView={setView}
+					viewMeeting={viewMeeting}
 					setMeetingID={setMeetingID}
 				/>
 			: <TodoList 

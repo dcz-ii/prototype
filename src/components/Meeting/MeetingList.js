@@ -47,7 +47,7 @@ function MeetingList(props) {
 					<TableCell>ID</TableCell>
 					<TableCell>Name</TableCell>
 					<TableCell>Created</TableCell>
-					<TableCell>Finished</TableCell>
+					<TableCell>Started</TableCell>
 					<TableCell>EDIT</TableCell>
 					<TableCell>DELETE</TableCell>
 				</TableRow>
@@ -57,7 +57,7 @@ function MeetingList(props) {
 				return(
 				<TableRow key={idx} hover onClick={() => {
 					if(!data.has_finished) {
-						props.setView('todo')
+						props.viewMeeting(data.id)
 						props.setMeetingID(data.id)
 					}
 				}}
@@ -65,7 +65,11 @@ function MeetingList(props) {
 					<TableCell width="20%">{data.id}</TableCell>
 					<TableCell width="20%">{data.name}</TableCell>
 					<TableCell width="20%">{moment(data.created_at).format('MMMM Do, h:mm')}</TableCell>
-					<TableCell width="20%">{_.toString(data.has_finished)}</TableCell>
+					<TableCell width="20%">
+						{!data.has_finished && data.start_time ? 
+							moment(data.start_time).fromNow()
+						: 'Start Meeting'}
+					</TableCell>
 					<TableCell width="10%">
 						<Button variant="contained" color="primary" onClick={(e) => {
 							e.preventDefault();
